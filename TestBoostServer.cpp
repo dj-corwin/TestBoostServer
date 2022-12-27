@@ -88,17 +88,17 @@ public:
         }
 
         _lock.lock();
-        if (command._Equal(_GET_STATE)) {
+        if (command == _GET_STATE) {
             reply.append(" ").append(led.getState());
-        } else if (command._Equal(_SET_STATE)) {
+        } else if (command == _SET_STATE) {
             if (!led.setState(arg.c_str())) reply.assign(_REPLY_FAILED);
-        } else if (command._Equal(_GET_COLOR)) {
+        } else if (command == _GET_COLOR) {
             reply.append(" ").append(led.getColor());
-        } else if (command._Equal(_SET_COLOR)) {
+        } else if (command == _SET_COLOR) {
             if (!led.setColor(arg.c_str())) reply.assign(_REPLY_FAILED);
-        } else if (command._Equal(_GET_RATE)) {
+        } else if (command == _GET_RATE) {
             reply.append(" ").append(led.getRate());
-        } else if (command._Equal(_SET_RATE)) {
+        } else if (command == _SET_RATE) {
             if (!led.setRate(arg.c_str())) reply.assign(_REPLY_FAILED);
         } else {
             reply.assign(_REPLY_FAILED);
