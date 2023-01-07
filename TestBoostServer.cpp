@@ -36,19 +36,23 @@ class LED {
 private:
     struct rate_t {
     public:
-        rate_t(void) { _value = 0; }
-        rate_t(size_t _rate) { _value = range(_rate); }
+        rate_t(void) { init(0); }
+        rate_t(size_t _rate) { init(_rate); }
+        ~rate_t(void) { free(__buf); }
 
-        operator const char* () const { char* res = (char*)malloc(sizeof(char) * 2); res[0] = nums[_value]; res[1] = 0;  return res; }
+        operator const char* () const { __buf[0] = nums[_value]; return __buf; }
 
         rate_t& operator= (const rate_t& _rate) { _value = _rate._value; return *this; }
         rate_t& operator= (size_t _rate) { _value = range(_rate); return *this; }
     private:
         const size_t max_rate = 5;
         const char nums[11] = "0123456789";
+        char* __buf;
+
+        size_t _value;
 
         size_t range(size_t _rate) { return _rate > max_rate ? max_rate : _rate; }
-        size_t _value;
+        void init(size_t _rate) { __buf = (char*)malloc(sizeof(char) * 2); __buf[1] = 0; range(_rate); }
     };
 
 public:
@@ -87,7 +91,7 @@ public:
             command.assign(command.substr(0, sp));
         }
 
-        _lock.lock();
+        std::lock_guard<std::mutex> locker(_lock);
         if (command == _GET_STATE) {
             reply.append(" ").append(led.getState());
         } else if (command == _SET_STATE) {
@@ -103,7 +107,6 @@ public:
         } else {
             reply.assign(_REPLY_FAILED);
         }
-        _lock.unlock();
 
         showState();
     }
@@ -117,7 +120,7 @@ private:
     }
 };
 
-static controller* ctrl;
+auto ctrl = std::make_shared<controller>();
 
 void session(tcp::socket sock) {
     try {
@@ -152,6 +155,8 @@ void server(boost::asio::io_context& io_context, unsigned short port) {
 }
 
 int main(int argc, char* argv[]) {
+    setlocale(LC_ALL, "Russian");
+
     try {
         if (argc != 2) {
             std::cerr << "Usage: TestBoostServer <port>\n";
@@ -160,15 +165,12 @@ int main(int argc, char* argv[]) {
 
         boost::asio::io_context io_context;
 
-        ctrl = new controller();
         server(io_context, std::atoi(argv[1]));
 
         io_context.run();
     } catch (std::exception& e) {
         std::cerr << "Exception: " << e.what() << "\n";
     }
-
-    delete ctrl;
 
     return 0;
 }

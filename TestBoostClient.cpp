@@ -1,5 +1,4 @@
 ﻿#include <cstdlib>
-#include <cstring>
 #include <iostream>
 #include <boost/asio.hpp>
 
