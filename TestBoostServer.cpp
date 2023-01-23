@@ -36,8 +36,8 @@ class LED {
 private:
     struct rate_t {
     public:
-        rate_t(void) { init(0); }
-        rate_t(size_t _rate) { init(_rate); }
+        rate_t(void) : rate_t(0) { /* Do nothing */ }
+        rate_t(size_t _rate) { __buf = (char*)malloc(sizeof(char) * 2); __buf[1] = 0; range(_rate); }
         ~rate_t(void) { free(__buf); }
 
         operator const char* () const { __buf[0] = nums[_value]; return __buf; }
@@ -52,7 +52,6 @@ private:
         size_t _value;
 
         size_t range(size_t _rate) { return _rate > max_rate ? max_rate : _rate; }
-        void init(size_t _rate) { __buf = (char*)malloc(sizeof(char) * 2); __buf[1] = 0; range(_rate); }
     };
 
 public:
